@@ -1,0 +1,50 @@
+{
+    "name": "purplespider/silverstripe-visual-block-picker",
+    "description": "Replaces the Elemental \"Add block\" popover with a visual picker showing screenshots, descriptions and groups",
+    "type": "silverstripe-vendormodule",
+    "keywords": [
+        "silverstripe",
+        "elemental",
+        "blocks",
+        "cms",
+        "editor"
+    ],
+    "license": "BSD-3-Clause",
+    "authors": [
+        {
+            "name": "James Cocker",
+            "email": "hello@purplespider.com",
+            "homepage": "https://purplespider.com"
+        }
+    ],
+    "require": {
+        "php": "^8.1",
+        "silverstripe/framework": "^5.0 || ^6.0",
+        "silverstripe/admin": "^2.0 || ^3.0",
+        "dnadesign/silverstripe-elemental": "^5.0 || ^6.0"
+    },
+    "require-dev": {
+        "silverstripe/recipe-testing": "^3 || ^4",
+        "squizlabs/php_codesniffer": "^3"
+    },
+    "autoload": {
+        "psr-4": {
+            "PurpleSpider\\VisualBlockPicker\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "PurpleSpider\\VisualBlockPicker\\Tests\\": "tests/php/"
+        }
+    },
+    "extra": {
+        "expose": [
+            "client/dist"
+        ],
+        "branch-alias": {
+            "dev-main": "1.x-dev"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

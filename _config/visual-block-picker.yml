@@ -1,0 +1,37 @@
+---
+Name: visualblockpicker
+After:
+  - '#elemental'
+  - '#elementalvirtual'
+---
+SilverStripe\Core\Injector\Injector:
+  Psr\SimpleCache\CacheInterface.visualBlockPicker:
+    factory: SilverStripe\Core\Cache\CacheFactory
+    constructor:
+      namespace: 'visualBlockPicker'
+
+DNADesign\Elemental\Controllers\ElementalAreaController:
+  extensions:
+    - PurpleSpider\VisualBlockPicker\Extensions\ElementalAreaControllerExtension
+
+SilverStripe\Admin\LeftAndMain:
+  extra_requirements_javascript:
+    - 'purplespider/silverstripe-visual-block-picker:client/dist/js/visual-block-picker.js'
+  extra_requirements_css:
+    - 'purplespider/silverstripe-visual-block-picker:client/dist/styles/visual-block-picker.css'
+
+PurpleSpider\VisualBlockPicker\Services\ScreenshotResolver:
+  screenshot_dirs:
+    - 'public/images/blocks'
+  screenshot_extensions:
+    - 'webp'
+    - 'png'
+    - 'jpg'
+    - 'jpeg'
+    - 'svg'
+
+PurpleSpider\VisualBlockPicker\Services\BlockPickerConfigProvider:
+  ungrouped_title: 'Other'
+  exclude_classes: []
+  groups: []
+  show_title_icons: false

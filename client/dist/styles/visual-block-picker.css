@@ -1,0 +1,215 @@
+/**
+ * Visual Block Picker
+ *
+ * Styles for the modal that replaces Elemental's "Add block" popover.
+ *
+ * Colours are silverstripe/admin's own palette, so the picker reads as part of the CMS
+ * rather than as a bolted-on panel. Values are taken from
+ * admin/client/src/styles/_bootstrap-variables.scss:
+ *
+ *   #43536d  $gray-700 / $body-color  - text, labels, iconography
+ *   #566b8d  $gray-600 / $text-muted  - secondary text
+ *   #8f9fba  $gray-400                - de-emphasised iconography
+ *   #ced5e1  $gray-200 / $border-color
+ *   #eef0f4  $gray-100
+ *   #005ae1  $blue / $component-active-bg
+ */
+
+.visual-block-picker__dialog {
+    max-width: 62rem;
+}
+
+.visual-block-picker .modal-body {
+    max-height: calc(100vh - 14rem);
+    overflow-y: auto;
+}
+
+/* Search --------------------------------------------------------------- */
+
+.visual-block-picker__search {
+    margin-bottom: 1rem;
+}
+
+/* Visually hidden, but still announced and still a real label target. */
+.visual-block-picker__search-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.visual-block-picker__search-input {
+    width: 100%;
+}
+
+.visual-block-picker__status {
+    margin-bottom: 0.5rem;
+    color: #566b8d;
+    min-height: 1.25rem;
+}
+
+.visual-block-picker__empty {
+    padding: 2rem 0;
+    margin: 0;
+    text-align: center;
+    color: #566b8d;
+}
+
+/* Groups --------------------------------------------------------------- */
+
+/* Two of the admin's 16px $spacer, so groups read as distinct bands. */
+.visual-block-picker__group + .visual-block-picker__group {
+    margin-top: 2.4615rem;
+}
+
+.visual-block-picker__group-title {
+    margin: 0 0 0.75rem;
+    padding-bottom: 0.375rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #43536d;
+    border-bottom: 1px solid #ced5e1;
+}
+
+/* Cards ---------------------------------------------------------------- */
+
+.visual-block-picker__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+    gap: 1rem;
+}
+
+.visual-block-picker__card {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    overflow: hidden;
+    text-align: left;
+    background: #fff;
+    border: 1px solid #ced5e1;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: box-shadow 0.12s ease-in-out;
+}
+
+/*
+ * Hover raises the card to the admin's `$z-depth-1` elevation - the same two-layer shadow
+ * elemental gives its own block cards (`.element-editor__element:hover`) and the admin gives
+ * the popover this modal replaces. It's a real design token, defined at
+ * admin/client/src/styles/_variables.scss:144 and exposed as the `.z-depth-1` utility class;
+ * inlined here so the module doesn't depend on admin's SCSS build.
+ *
+ * Deliberately no border-colour change: in the CMS blue means active or selected, and it's
+ * reserved below for the focus ring so hover and focus stay tellable apart.
+ */
+.visual-block-picker__card:hover {
+    box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.1), 0 2px 10px 0 rgba(0, 0, 0, 0.1);
+}
+
+/*
+ * Bootstrap 4's Reboot sets `button:focus { outline: 5px auto -webkit-focus-ring-color }`,
+ * which fires on mouse click where :focus-visible does not. Handle :focus explicitly so it
+ * can't override this indicator. (The admin's own
+ * `button:focus:not(:focus-visible) { outline: 0 }` still wins for the mouse case, which is
+ * the behaviour we want.)
+ *
+ * #005ae1 on the #fff card measures 5.9:1, comfortably clear of the 3:1 target for a
+ * non-text indicator, and the offset outline is a visual element the resting state has no
+ * counterpart for.
+ */
+.visual-block-picker__card:focus,
+.visual-block-picker__card:focus-visible {
+    outline: 2px solid #005ae1;
+    outline-offset: 2px;
+    border-color: #005ae1;
+}
+
+.visual-block-picker__shot {
+    display: block;
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background: #eef0f4;
+    border-bottom: 1px solid #ced5e1;
+}
+
+.visual-block-picker__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Fallback tile for blocks with no screenshot yet. */
+.visual-block-picker__shot--empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.visual-block-picker__shot-icon::before {
+    font-size: 2.5rem;
+    line-height: 1;
+    color: #8f9fba;
+}
+
+.visual-block-picker__meta {
+    display: block;
+    padding: 0.625rem 0.75rem 0.75rem;
+}
+
+/*
+ * The name carries the hierarchy against the description below it on three axes: a step up
+ * the type scale (14px, the admin's $h4-font-size, against 13px body), heavier weight, and
+ * two steps darker on the grey ramp ($gray-800 against $gray-600).
+ */
+.visual-block-picker__name {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 1.0769rem;
+    font-weight: 700;
+    color: #303b4d;
+}
+
+/*
+ * Optical alignment. Flexbox lines the icon and title boxes up exactly, but every glyph in
+ * the `silverstripe` icon font sits high in its em box - its ink centre is 0.499em above the
+ * baseline, against 0.357em for the title's cap band - so the icon reads ~0.14em too high.
+ * Nudging it down by that much lands it on the title's optical centre. The icon font's
+ * metrics are uniform, so one value covers every block.
+ *
+ * Both the offset and the icon size are in `em` so they track the name's font size; the
+ * ratio only holds while the two scale together. Measured at 14px: needed 2.00px, applied
+ * 2.09px.
+ *
+ * Note the reference is the cap band, not the title string's ink bounds - a title with a
+ * descender ("Hero Image") would otherwise measure a centre ~1.3px lower than one without
+ * ("Featured Text") and the icon would drift per block.
+ */
+.visual-block-picker__icon::before {
+    position: relative;
+    top: 0.149em;
+    font-size: 1em;
+    line-height: 1;
+}
+
+/* Stays at body size so it remains comfortably readable; the name does the standing out. */
+.visual-block-picker__description {
+    display: block;
+    margin-top: 0.375rem;
+    font-size: 1rem;
+    line-height: 1.4;
+    color: #566b8d;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .visual-block-picker__card {
+        transition: none;
+    }
+}
