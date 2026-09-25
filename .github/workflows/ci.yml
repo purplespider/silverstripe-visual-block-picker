@@ -5,7 +5,18 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions: {}
+
 jobs:
   ci:
     name: CI
+    # Don't run twice for a pull request from a branch in this repo - the push already ran
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
+    # gha-ci's jobs declare these, and a reusable workflow can't be granted more than its
+    # caller has, so without them the run fails at startup. actions: write is only used by
+    # gha-ci's auto-tagging for silverstripe-org repos, but must still be granted.
+    permissions:
+      pull-requests: read
+      contents: read
+      actions: write
     uses: silverstripe/gha-ci/.github/workflows/ci.yml@v1
