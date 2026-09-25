@@ -27,7 +27,8 @@
 /* Search --------------------------------------------------------------- */
 
 .visual-block-picker__search {
-    margin-bottom: 1rem;
+    position: relative;
+    margin-bottom: 1.5rem;
 }
 
 /* Visually hidden, but still announced and still a real label target. */
@@ -43,14 +44,32 @@
     border: 0;
 }
 
+/* Right padding keeps typed text clear of the result count overlaid at that end. */
 .visual-block-picker__search-input {
     width: 100%;
+    padding-right: 8.5rem;
 }
 
+/*
+ * The result count, overlaid on the right-hand end of the search field rather than sitting
+ * between the field and the first group heading, where it read as part of the heading and
+ * reserved an empty line whenever there was no search. Out of the flow, it also appears
+ * without nudging the results down.
+ *
+ * #566b8d on the field's #fff measures 5.3:1, clear of 4.5:1 at this 12px size.
+ * pointer-events: none so clicks on it still land in the field.
+ */
 .visual-block-picker__status {
-    margin-bottom: 0.5rem;
+    position: absolute;
+    top: 0;
+    right: 0.75rem;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    font-size: 0.9231rem;
+    white-space: nowrap;
     color: #566b8d;
-    min-height: 1.25rem;
+    pointer-events: none;
 }
 
 .visual-block-picker__empty {

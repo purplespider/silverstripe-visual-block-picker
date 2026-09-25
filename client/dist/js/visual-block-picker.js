@@ -295,6 +295,20 @@
       var resultCount = countBlocks(visibleGroups);
       var noResults = resultCount === 0;
 
+      // Sits inside the search wrapper so it can be overlaid on the field's right-hand end,
+      // out of the flow - the results below don't shift as it appears and disappears.
+      var liveRegion = h(
+        'div',
+        {
+          className: 'visual-block-picker__status',
+          role: 'status',
+          'aria-live': 'polite'
+        },
+        search.trim()
+          ? resultCount + ' ' + (resultCount === 1 ? 'block' : 'blocks') + ' found'
+          : ''
+      );
+
       var searchField = h(
         'div',
         { className: 'visual-block-picker__search' },
@@ -314,19 +328,8 @@
           onChange: function (event) {
             setSearch(event.target.value);
           }
-        })
-      );
-
-      var liveRegion = h(
-        'div',
-        {
-          className: 'visual-block-picker__status',
-          role: 'status',
-          'aria-live': 'polite'
-        },
-        search.trim()
-          ? resultCount + ' ' + (resultCount === 1 ? 'block' : 'blocks') + ' found'
-          : ''
+        }),
+        liveRegion
       );
 
       function renderCard(block) {
@@ -444,7 +447,6 @@
           ModalBody,
           null,
           searchField,
-          liveRegion,
           noResults
             ? h(
               'p',
