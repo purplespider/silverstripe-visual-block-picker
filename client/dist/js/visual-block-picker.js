@@ -405,6 +405,23 @@
         );
       }
 
+      // Admin's own close button (components/Modal/ModalCloseButton), rebuilt here as it isn't
+      // exposed. reactstrap's default is a bare .btn-close, which admin's modal styles blank
+      // out (`.modal-header .btn-close { --bs-btn-close-bg: none }`) in favour of this icon,
+      // leaving an invisible - though still clickable - button.
+      var closeLabel = translate('Admin.CLOSE', 'Close');
+      var closeButton = h(
+        'button',
+        {
+          type: 'button',
+          className: 'btn btn-close btn--icon-xl btn--no-text modal__close-button',
+          onClick: handleToggle,
+          'aria-label': closeLabel,
+          title: closeLabel
+        },
+        h('span', { className: 'btn__icon font-icon-cancel', 'aria-hidden': 'true' })
+      );
+
       return h(
         Modal,
         {
@@ -429,7 +446,7 @@
         },
         h(
           ModalHeader,
-          { toggle: handleToggle, id: titleId },
+          { toggle: handleToggle, id: titleId, close: closeButton },
           translate('ElementAddNewButton.ADD_BLOCK', 'Add block')
         ),
         h(
