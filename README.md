@@ -11,9 +11,19 @@ Blocks without a screenshot fall back to an icon tile, so the picker is useful s
 
 ## Requirements
 
-- Silverstripe CMS 5 or 6
-- `dnadesign/silverstripe-elemental` 5 or 6
+- Silverstripe CMS 5
+- `dnadesign/silverstripe-elemental` 5
 - PHP 8.1+
+
+## Versions
+
+| Module | Silverstripe CMS | Elemental | Branch |
+| --- | --- | --- | --- |
+| 2.x | 6 | 6 | `main` |
+| 1.x | 5 | 5 | `1` |
+
+This is the 1.x branch, for CMS 5. Composer picks the right major for your project
+automatically.
 
 ## Installation
 
