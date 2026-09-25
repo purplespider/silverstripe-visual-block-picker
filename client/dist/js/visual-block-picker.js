@@ -28,6 +28,12 @@
   var LOG_PREFIX = '[visual-block-picker]';
   var ELEMENTAL_SECTION = 'DNADesign\\Elemental\\Controllers\\ElementalAreaController';
 
+  /**
+   * Carries AddElementPopover's `elementTypes` down to the option set it renders, which
+   * only receives the derived `buttons` and so can't see block classes or icons itself.
+   */
+  var ElementTypesContext = React ? React.createContext(null) : null;
+
   function warn(message, error) {
     if (window.console && window.console.error) {
       window.console.error(LOG_PREFIX, message, error || '');
@@ -120,7 +126,8 @@
 
         bucketFor(group).blocks.push({
           key: elementType.class,
-          elementType: elementType,
+          // Elemental keys each add button by the type name, so this finds the button.
+          name: elementType.name,
           title: elementType.title || elementType.class,
           icon: elementType.icon,
           screenshot: entry.screenshot || null,
@@ -203,30 +210,6 @@
     }, 0);
   }
 
-  /**
-   * Replicate the preview reload elemental's own popover does after adding a block -
-   * without it the CMS preview pane goes stale after every add.
-   */
-  function reloadPreview() {
-    try {
-      var $ = window.jQuery;
-
-      if (!$) {
-        return;
-      }
-
-      var preview = $('.cms-preview');
-
-      if (!preview.length || !preview.entwine) {
-        return;
-      }
-
-      preview.entwine('ss.preview')._loadUrl(preview.find('iframe').attr('src'));
-    } catch (error) {
-      warn('could not reload the preview pane', error);
-    }
-  }
-
   function createPicker() {
     var h = React.createElement;
     var Modal = Reactstrap.Modal;
@@ -235,6 +218,7 @@
 
     function VisualBlockPicker(props) {
       var elementTypes = props.elementTypes;
+      var buttons = props.buttons;
       var isOpen = props.isOpen;
       var toggle = props.toggle;
 
@@ -252,28 +236,33 @@
         toggle();
       }, [toggle]);
 
-      var handleAdd = React.useCallback(function (elementType) {
+      var buttonsByName = React.useMemo(function () {
+        var map = {};
+
+        (buttons || []).forEach(function (button) {
+          map[button.key] = button;
+        });
+
+        return map;
+      }, [buttons]);
+
+      var handleAdd = React.useCallback(function (block) {
         return function (event) {
-          event.preventDefault();
+          var button = buttonsByName[block.name];
 
-          var handleAddElementToArea = props.actions && props.actions.handleAddElementToArea;
-
-          if (!handleAddElementToArea) {
-            warn('the add-element mutation is unavailable - is the transform registered after "cms-element-adder"?');
+          if (!button || !button.onClick) {
+            event.preventDefault();
+            warn('elemental supplied no add button for ' + block.key);
             return;
           }
 
-          Promise.resolve(handleAddElementToArea(elementType.class, props.insertAfterElement))
-            .then(reloadPreview)
-            .catch(function (error) {
-              // Neither elemental's mutation nor its popover handles a rejection, which
-              // otherwise leaves an unhandled rejection and a silently dead dialog.
-              warn('could not add the block', error);
-            });
-
-          handleToggle();
+          // Elemental's own handler does the whole add - the request, the area refresh,
+          // the preview reload and any error toast - and closes the popover via toggle().
+          // That's the same toggle we were given, so clearing search is all that's left.
+          setSearch('');
+          button.onClick(event);
         };
-      }, [props.actions, props.insertAfterElement, handleToggle]);
+      }, [buttonsByName]);
 
       var groups = React.useMemo(function () {
         return buildGroups(elementTypes || []);
@@ -364,7 +353,7 @@
             key: block.key,
             className: 'visual-block-picker__card',
             'aria-label': label,
-            onClick: handleAdd(block.elementType)
+            onClick: handleAdd(block)
           },
           thumbnail,
           h(
@@ -422,7 +411,7 @@
           isOpen: true,
           toggle: handleToggle,
           size: 'lg',
-          // Whitelisted props only: the call sites pass `container`, `target` and
+          // Whitelisted props only: elemental passes `container`, `target` and
           // `placement` for Popper, and reactstrap's Modal also honours `container` -
           // spreading would portal a full-screen dialog into a 4px hover bar.
           className: 'visual-block-picker__dialog',
@@ -461,10 +450,9 @@
     if (PropTypes) {
       VisualBlockPicker.propTypes = {
         elementTypes: PropTypes.array.isRequired,
+        buttons: PropTypes.array.isRequired,
         isOpen: PropTypes.bool.isRequired,
-        toggle: PropTypes.func.isRequired,
-        insertAfterElement: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-        actions: PropTypes.object
+        toggle: PropTypes.func.isRequired
       };
     }
 
@@ -473,8 +461,54 @@
     return VisualBlockPicker;
   }
 
+  /**
+   * Stands in for the PopoverOptionSet that elemental's AddElementPopover renders.
+   *
+   * Taking over here rather than replacing AddElementPopover means elemental keeps doing the
+   * adding. How it adds a block has changed between majors - an Apollo mutation HOC
+   * ('cms-element-adder') in 5, a REST call inline in the popover in 6 - but both build the
+   * same `buttons` with a working onClick and hand them to this component.
+   */
+  function createOptionSet(picker) {
+    var h = React.createElement;
+
+    return function (PopoverOptionSet) {
+      function VisualBlockPickerOptionSet(props) {
+        var elementTypes = React.useContext(ElementTypesContext);
+
+        // Something other than AddElementPopover rendered PopoverOptionSet in the
+        // ElementEditor context - leave that one alone.
+        if (!elementTypes) {
+          return h(PopoverOptionSet, props);
+        }
+
+        return h(picker, Object.assign({}, props, { elementTypes: elementTypes }));
+      }
+
+      VisualBlockPickerOptionSet.displayName = 'VisualBlockPickerOptionSet';
+
+      return VisualBlockPickerOptionSet;
+    };
+  }
+
+  function provideElementTypes(AddElementPopover) {
+    var h = React.createElement;
+
+    function AddElementPopoverWithTypes(props) {
+      return h(
+        ElementTypesContext.Provider,
+        { value: props.elementTypes || null },
+        h(AddElementPopover, props)
+      );
+    }
+
+    AddElementPopoverWithTypes.displayName = 'AddElementPopoverWithTypes';
+
+    return AddElementPopoverWithTypes;
+  }
+
   function boot() {
-    if (!React || !Reactstrap || !classNames || !Inj || !Cfg) {
+    if (!React || !React.createContext || !Reactstrap || !classNames || !Inj || !Cfg) {
       warn('the CMS bundle did not expose the globals this module needs; picker not installed');
       return;
     }
@@ -482,20 +516,13 @@
     var picker = createPicker();
 
     try {
-      Inj.transform(
-        'visual-block-picker',
-        function (updater) {
-          // The wrapped component is deliberately discarded - this replaces elemental's
-          // popover rather than decorating it.
-          updater.component('AddElementPopover', function () {
-            return picker;
-          }, 'VisualBlockPicker');
-        },
-        // Required: MiddlewareRegistry sorts topologically and compose() makes the first
-        // entry outermost, so running after 'cms-element-adder' means elemental's Apollo
-        // mutation HOC wraps ours and passes down actions.handleAddElementToArea.
-        { after: 'cms-element-adder' }
-      );
+      Inj.transform('visual-block-picker', function (updater) {
+        updater.component('AddElementPopover', provideElementTypes, 'AddElementPopoverWithTypes');
+
+        // AddElementPopover injects PopoverOptionSet with the 'ElementEditor' context, so
+        // this swaps it there without touching any other option set in the CMS.
+        updater.component('PopoverOptionSet.ElementEditor', createOptionSet(picker), 'VisualBlockPicker');
+      });
     } catch (error) {
       warn('could not register the Injector transform', error);
     }
