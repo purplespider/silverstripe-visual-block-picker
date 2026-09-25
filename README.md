@@ -11,7 +11,7 @@ Blocks without a screenshot fall back to an icon tile, so the picker is useful s
 
 ## Requirements
 
-- Silverstripe CMS 5
+- Silverstripe CMS 5.4+
 - `dnadesign/silverstripe-elemental` 5
 - PHP 8.1+
 
