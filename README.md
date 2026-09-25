@@ -11,9 +11,9 @@ Blocks without a screenshot fall back to an icon tile, so the picker is useful s
 
 ## Requirements
 
-- Silverstripe CMS 5
-- `dnadesign/silverstripe-elemental` 5
-- PHP 8.1+
+- Silverstripe CMS 6
+- `dnadesign/silverstripe-elemental` 6
+- PHP 8.3+
 
 ## Versions
 
@@ -22,7 +22,7 @@ Blocks without a screenshot fall back to an icon tile, so the picker is useful s
 | 2.x | 6 | 6 | `main` |
 | 1.x | 5 | 5 | `1` |
 
-This is the 1.x branch, for CMS 5. Composer picks the right major for your project
+This is the 2.x branch, for CMS 6. Composer picks the right major for your project
 automatically.
 
 ## Installation
@@ -31,7 +31,7 @@ automatically.
 composer require purplespider/silverstripe-visual-block-picker
 ```
 
-Then flush: visit any page with `?flush=1`, or run `sake dev/build --flush`.
+Then flush: visit any page with `?flush=1`, or run `sake db:build --flush`.
 
 That's it — there's no build step and nothing to configure to get started.
 

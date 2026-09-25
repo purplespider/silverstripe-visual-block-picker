@@ -18,13 +18,13 @@
         }
     ],
     "require": {
-        "php": "^8.1",
-        "silverstripe/framework": "^5.0",
-        "silverstripe/admin": "^2.0",
-        "dnadesign/silverstripe-elemental": "^5.0"
+        "php": "^8.3",
+        "silverstripe/framework": "^6.0",
+        "silverstripe/admin": "^3.0",
+        "dnadesign/silverstripe-elemental": "^6.0"
     },
     "require-dev": {
-        "silverstripe/recipe-testing": "^3",
+        "silverstripe/recipe-testing": "^4",
         "squizlabs/php_codesniffer": "^3"
     },
     "autoload": {
@@ -40,7 +40,10 @@
     "extra": {
         "expose": [
             "client/dist"
-        ]
+        ],
+        "branch-alias": {
+            "dev-main": "2.x-dev"
+        }
     },
     "minimum-stability": "dev",
     "prefer-stable": true
